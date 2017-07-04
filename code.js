@@ -7,14 +7,14 @@ function httpGet(url, callback) {
         if (request.status == 200) {
             callback(request.response);
         } else {
-            request.onerror()
+            request.onerror();
         }
     }
 
     request.onerror = function () {
         console.log('Request failed ' + request.statusText);
         $('div.container').append('An error has occurred. Detailed info: '
-            + request.statusText)
+            + request.statusText);
     }
 
     request.open('GET', url, true);
@@ -41,17 +41,18 @@ $(document).ready(function() {
         });
 
         books.sort(function (a, b) {
+            // Sort by rating, then by amount of people rated
             return b.rating - a.rating || b.peopleRated - a.peopleRated;
         });
 
         var container = $('div.container');
         var div = $('<div></div>');
         for (var i = 0; i < books.length; i++) {
+            var book = books[i];
             var innerDiv = $('<div></div>');
             var a = $('<a></a>');
-            a.attr('href', 'https://fantasy-worlds.org/lib/id' + books[i].id);
-            a.text('(' + books[i].rating + '|' + books[i].peopleRated
-                + 'ratings) ' + books[i].titleRu);
+            a.attr('href', 'https://fantasy-worlds.org/lib/id' + book.id);
+            a.text('(' + book.rating + ') ' + book.titleRu);
             innerDiv.append(a);
             div.append(innerDiv);
         }
