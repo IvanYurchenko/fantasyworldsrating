@@ -1,27 +1,41 @@
 /**
  * Created by Ivan Yurchenko on 7/4/17.
  */
-function httpGet(url, callback) {
-    var request = new XMLHttpRequest();
-    request.onload = function () {
-        if (request.status == 200) {
-            callback(request.response);
-        } else {
-            request.onerror();
+$(document).ready(function () {
+    function httpGet(url, callback) {
+        var request = new XMLHttpRequest();
+        request.onload = function () {
+            if (request.status == 200) {
+                callback(request.response);
+            } else {
+                request.onerror();
+            }
         }
+
+        request.onerror = function () {
+            console.log('Request failed ' + request.statusText);
+            $('div.container').append('An error has occurred. Detailed info: '
+                + request.statusText);
+        }
+
+        request.open('GET', url, true);
+        request.send(null);
     }
 
-    request.onerror = function () {
-        console.log('Request failed ' + request.statusText);
-        $('div.container').append('An error has occurred. Detailed info: '
-            + request.statusText);
+    function showSpinner() {
+        // Spinner configuration
+        var opts = { lines: 13, length: 26, width: 12, radius: 36, scale: 0.5 };
+        var target = document.getElementById('spinner');
+        var spinner = new Spinner(opts).spin(target);
+
+        return function() {
+            spinner.stop();
+        };
     }
 
-    request.open('GET', url, true);
-    request.send(null);
-}
+    // Show spinner and store function that stops it
+    var stopSpinner = showSpinner();
 
-$(document).ready(function() {
     httpGet('https://api.fantasy-worlds.org/books', function (response) {
         var items = JSON.parse(response).items;
         var books = items.map(function (item) {
@@ -45,6 +59,7 @@ $(document).ready(function() {
             return b.rating - a.rating || b.peopleRated - a.peopleRated;
         });
 
+        // Append all books to the document
         var container = $('div.container');
         var div = $('<div></div>');
         for (var i = 0; i < books.length; i++) {
@@ -57,5 +72,8 @@ $(document).ready(function() {
             div.append(innerDiv);
         }
         container.append(div);
+
+        // Stop the spinner
+        stopSpinner();
     });
 });
