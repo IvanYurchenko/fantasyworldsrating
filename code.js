@@ -1,96 +1,60 @@
-$(function () {
-
-    function createCORSRequest(method, url) {
-        var xhr = new XMLHttpRequest();
-        if ("withCredentials" in xhr) {
-            // XHR has 'withCredentials' property only if it supports CORS
-            xhr.open(method, url, true);
-        } else if (typeof XDomainRequest != "undefined") { // if IE use XDR
-            xhr = new XDomainRequest();
-            xhr.open(method, url);
+/**
+ * Created by Ivan Yurchenko on 7/4/17.
+ */
+function httpGet(url, callback) {
+    var request = new XMLHttpRequest();
+    request.onload = function () {
+        if (request.status == 200) {
+            callback(request.response);
         } else {
-            xhr = null;
+            request.onerror()
         }
-        return xhr;
     }
 
-    function fillPage() {
+    request.onerror = function () {
+        console.log('Request failed ' + request.statusText);
+        $('div.container').append('An error has occurred. Detailed info: '
+            + request.statusText)
+    }
 
-        var books = [];
-        var promises = [];
+    request.open('GET', url, true);
+    request.send(null);
+}
 
-        function createRequestOnPage(number, resolve) {
+$(document).ready(function() {
+    httpGet('https://api.fantasy-worlds.org/books', function (response) {
+        var items = JSON.parse(response).items;
+        var books = items.map(function (item) {
+            var ratingStr = item[6];
+            var book = {
+                id: parseInt(item[0]),
+                authorName: item[1],
+                authorSurname: item[2],
+                titleRu: item[3],
+                titleEn: item[4],
+                year: item[7],
+                rating: parseFloat(ratingStr),
+                peopleRated: parseInt(ratingStr.substr(ratingStr.indexOf('/') + 1))
+            };
 
-            var request = createCORSRequest("get", "https://fantasy-worlds.org/lib/" + number);
-            if (request) {
-                request.onload = function () {
-                    console.log('success');
-
-                    var elements = $.makeArray($('div.news_footer > span > div', request.response));
-                    var links = $.makeArray($('div.news_title > a', request.response));
-                    //elements = [ "a", "b", "c", "d", "e" ];
-                    books = books.concat(elements.map(function (el, index) {
-                        var rating = parseFloat($(el).text().split(/\s+/)[1]);
-                        var link = 'https://fantasy-worlds.org' + $(links[index]).attr('href');
-                        var title = $(links[index]).text();
-                        return {
-                            rating: rating,
-                            title: title,
-                            link: link
-                        };
-                    }));
-                    resolve();
-
-                };
-                // Send request
-                request.send();
-            }
-        }
-
-        for (var i = 1; i <= 1229; i++) {
-            var promise = new Promise(function (resolve, reject) {
-                createRequestOnPage(i, resolve);
-            });
-            promises.push(promise);
-        }
-
-        Promise.all(promises).then(function () {
-            books.sort(function (a, b) {
-                return b.rating - a.rating;
-            });
-
-            var container = $('div.container');
-            var div = $('<div></div>');
-            for (var i = 0; i < books.length; i++) {
-                var innerDiv = $('<div></div>');
-                var a = $('<a></a>');
-                a.attr('href', books[i].link);
-                a.text('(' + books[i].rating + ') ' + books[i].title);
-                innerDiv.append(a);
-                div.append(innerDiv);
-            }
-            container.append(div);
+            return book;
         });
-    }
 
-    fillPage();
-    // $.ajax({
-    //     url:"https://fantasy-worlds.org/lib/1",
-    //     dataType: 'jsonp', // Notice! JSONP <-- P (lowercase)
-    //     headers: {"Access-Control-Allow-Origin": "*"},
-    //     success:function(json){
-    //         // do stuff with json (in this case an array)
-    //         alert("Success");
-    //     },
-    //     error:function(e){
-    //         alert(e);
-    //     }
-    // });
+        books.sort(function (a, b) {
+            return b.rating - a.rating || b.peopleRated - a.peopleRated;
+        });
 
-    // $.get("https://fantasy-worlds.org/lib/1", function(data, status){
-    //     alert("Data: " + data + "\nStatus: " + status);
-    // });
-
-    // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
-    // saveAs(blob, "hello world.txt");
+        var container = $('div.container');
+        var div = $('<div></div>');
+        for (var i = 0; i < books.length; i++) {
+            var innerDiv = $('<div></div>');
+            var a = $('<a></a>');
+            a.attr('href', 'https://fantasy-worlds.org/lib/id' + books[i].id);
+            a.text('(' + books[i].rating + '|' + books[i].peopleRated
+                + 'ratings) ' + books[i].titleRu);
+            innerDiv.append(a);
+            div.append(innerDiv);
+        }
+        container.append(div);
+    });
 });
