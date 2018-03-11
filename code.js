@@ -65,6 +65,7 @@ $(document).ready(function () {
         for (var i = 0; i < books.length; i++) {
             var book = books[i];
             var a = $('<a></a>');
+            var innerDiv = $('<div></div>');
             a.attr('href', 'https://fantasy-worlds.org/lib/id' + book.id);
             
             var text = '(' + book.rating + '/10, ' + book.peopleRated + ') ' + book.titleRu + ' - ' 
