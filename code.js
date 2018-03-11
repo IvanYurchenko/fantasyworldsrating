@@ -64,11 +64,15 @@ $(document).ready(function () {
         var div = $('<div></div>');
         for (var i = 0; i < books.length; i++) {
             var book = books[i];
-            var innerDiv = $('<div></div>');
             var a = $('<a></a>');
             a.attr('href', 'https://fantasy-worlds.org/lib/id' + book.id);
-            a.text('(' + book.rating + '/10, ' + book.peopleRated + ') ' + book.titleRu + ' - ' 
-                   + book.authorName + ' ' + book.authorSurname + ' [' + book.year + ']');
+            
+            var text = '(' + book.rating + '/10, ' + book.peopleRated + ') ' + book.titleRu + ' - ' 
+                   + book.authorName + ' ' + book.authorSurname;
+            if(!!book.year) {
+                text += ' [' + book.year + ']';
+            }
+            a.text(text);
             innerDiv.append(a);
             div.append(innerDiv);
         }
