@@ -68,7 +68,7 @@ $(document).ready(function () {
             var innerDiv = $('<div></div>');
             a.attr('href', 'https://fantasy-worlds.org/lib/id' + book.id);
             
-            var text = '(' + book.rating + '/10, ' + book.peopleRated + ') ' + book.titleRu + ' - ' 
+            var text = '(' + book.rating + '/10, ' + book.peopleRated + ' оценок) ' + book.titleRu + ' - ' 
                    + book.authorName + ' ' + book.authorSurname;
             if(!!book.year) {
                 text += ' [' + book.year + ']';
