@@ -55,7 +55,7 @@ $(document).ready(function () {
         });
 
         books.sort(function (a, b) {
-            return b.peopleRated * b.rating - a.peopleRated * a.rating;
+            return Math.log2(b.peopleRated) * b.rating - Math.log2(a.peopleRated) * a.rating;
         });
 
         // Append all books to the document
