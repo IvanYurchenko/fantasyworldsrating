@@ -55,8 +55,7 @@ $(document).ready(function () {
         });
 
         books.sort(function (a, b) {
-            // Sort by popularity, then by rating
-            return b.peopleRated - a.peopleRated || b.rating - a.rating;
+            return b.peopleRated * b.rating - a.peopleRated * a.rating;
         });
 
         // Append all books to the document
